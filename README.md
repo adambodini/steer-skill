@@ -4,7 +4,7 @@ The methodology behind Bod Brands growth consulting, written as portable skills.
 
 ## The separation rule
 
-This repo holds **methodology only**: how things are done. It never holds client data, client names, client numbers or employer (TimeLeft) material. Client data lives in Notion (Bod Brands HQ), one record per client. Nothing crosses between the two.
+This repo holds **methodology only**: how things are done. It never holds client data, client names, client numbers or any employer material. Client data lives in Notion (Bod Brands HQ), one record per client. Nothing crosses between the two.
 
 ## What's here
 
