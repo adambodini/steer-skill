@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-10-23
+- Canvas: explicit goals with currency, number formatting (k/m understood), business model choice (one-off, repeat, subscription), "Optimising for" dropdown, channel map rebuilt as one row per channel. cac-ceiling v0.2; workshop-to-notion v0.3.1.
 - Added from project drafts: google-ads-channel-standard, tiktok-ads-channel-standard, creator-channel-standard (v0.1.1: references renamed, IP line made generic), monthly-state-of-play, mentor-loop, prospect-research (v0.1, unchanged).
 - Added workshop-to-notion v0.3: owned by the Delivery agent; brief mirrors the canvas columns; proposal sections defined.
 - state-of-play-workshop v0.2: owner and date asked for each lever; summary and proposal are drafts for Adam to approve.

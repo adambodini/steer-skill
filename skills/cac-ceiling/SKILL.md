@@ -21,11 +21,25 @@ The question is never "what is our ROAS?" It is "what is our CM2 per new custome
 | = **CM3** | Fully loaded margin |
 
 ## The ceiling
-- **CM1 per customer** = average order value (net of returns) × gross margin % × orders in the first 12 months.
-- **CAC ceiling** = CM1 per customer − target CM2 per customer.
-- Use 1 order for a first-order view; use the 12-month figure only if repeat data is real, and say which.
+Everything is measured over the same window: a new customer's **first 12 months**.
+
+**CM1 per customer (12 months)**, by business model:
+| Model | CM1 per customer |
+|---|---|
+| One-off purchase | average order value (net of returns) × gross margin % |
+| Repeat purchase | average order value × gross margin % × orders in the first 12 months |
+| Subscription | monthly revenue per subscriber × gross margin % × average months a subscriber stays in their first 12 months |
+
+For a subscription, the months come from monthly churn: 1 + (1 − churn) + (1 − churn)² + … over 12 months. Example: 10% monthly churn ≈ 7.2 months.
+
+**CAC ceiling** = CM1 per customer − target CM2 per customer.
+
+**Target CM2** is the profit the brand wants to keep from each new customer's first 12 months, after paying to win them. It's the brand's choice: a higher target means a lower ceiling and safer, slower growth.
 
 Example: £85 × 55% × 1 order = £46.75 CM1. Target CM2 £20 → ceiling £26.75.
+
+### Why 12 months, not lifetime value
+Lifetime value (for a subscription, monthly gross profit ÷ monthly churn) is shown for reference only. The ceiling uses the first 12 months so it doesn't depend on customers staying for years, and so a brand isn't told it can afford a CAC it would take years to earn back.
 
 ## What to look for
 - **Do they know these numbers?** Most don't know their 12-month repeat rate. That is a gap.
@@ -35,3 +49,7 @@ Example: £85 × 55% × 1 order = £46.75 CM1. Target CM2 £20 → ceiling £26.
 
 ## In the workshop
 The ceiling is worked out silently and shown only at the reveal, next to their own target and what they pay.
+
+## Change log
+- v0.2 (23 Oct 2026): business models added (one-off, repeat, subscription); subscription value from monthly churn over 12 months; target CM2 defined with its time window; lifetime value shown for reference only.
+- v0.1 (22 Oct 2026): first version, from STEER's contribution margin stack.

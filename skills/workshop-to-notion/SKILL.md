@@ -3,7 +3,7 @@ name: workshop-to-notion
 description: Agent 1, owned by the Delivery agent. After a State of Play workshop, write the saved canvas into the brand's client record in Bod Brands HQ (Notion), log the workshop as a meeting, and draft the summary and proposal for Adam to approve.
 ---
 
-# Workshop to Notion (Agent 1) v0.3
+# Workshop to Notion (Agent 1) v0.3.1
 
 Owned by the **Delivery agent**: its output is the onboarding brief. Runs straight after a `state-of-play-workshop`. It turns the saved canvas into the client record, so the canvas becomes the onboarding brief. It is also the hub's graduation test: Bod Brands HQ stays at "Testing" until one real workshop has gone through this skill end to end and Adam has checked the result.
 
@@ -67,7 +67,7 @@ Client data goes into Notion only. Nothing from the canvas goes into this skill,
 
 **Body of the client record**, as the onboarding brief. Sections and columns mirror the canvas, so every canvas number has one place to go:
 1. **Goals:** revenue goal, contribution margin goal, their CAC target, why now, what stopped them, what they've tried, who the customer is.
-2. **What a new customer is worth:** average order value, gross margin %, orders per customer in the first 12 months, profit wanted after marketing (target CM2). Then the derived CM1 per customer and CAC ceiling, each carrying the weakest label of its inputs.
+2. **What a new customer is worth:** the business model and its inputs as on the canvas (one-off: order value; repeat: order value and orders in 12 months; subscription: monthly revenue per subscriber and monthly churn), gross margin %, and profit to keep per new customer (target CM2). Then the derived CM1 per customer and CAC ceiling, each carrying the weakest label of its inputs (see `cac-ceiling`). Lifetime value, if shown, is reference only.
 3. **Channels, last month:** one row per channel, organic included, with these columns, each figure labelled:
 
    | Channel | Spend | New customers (platform) | Platform share | CAC (platform) | Share of new customers | Share source | Working CAC | Owner | Optimising for |
@@ -130,6 +130,7 @@ Adam opens the record and confirms four things: no duplicate record, every canva
 - **Duplicate check on an empty database.** The fuzzy check can't be properly tested while Clients is empty. Re-test once real records exist.
 
 ## Change log
+- v0.3.1 (23 Oct 2026): unit economics follow the canvas's business model (one-off, repeat, subscription). "Optimising for" is now a fixed list on the canvas; "Not sure" counts as `OPEN`.
 - v0.3 (23 Oct 2026): three decisions from Adam.
   1. The Delivery agent owns this skill; Written by is `Delivery agent`.
   2. The brief mirrors the canvas: the channels table now has the canvas's columns (platform customers, platform share, share of new customers with its source, working CAC), and the goals and unit-economics sections match the canvas fields. Working CAC from an estimated share is a `GUESS`.

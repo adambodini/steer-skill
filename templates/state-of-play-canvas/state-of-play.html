@@ -68,7 +68,7 @@ button:hover{background:var(--paper-deep)}
 
 /* table */
 .tablebox{overflow-x:auto;border-top:2px solid var(--ink)}
-table{border-collapse:collapse;width:100%;min-width:920px}
+table{border-collapse:collapse;width:100%;min-width:1180px}
 th{text-align:left;padding:12px 8px;border-bottom:1px solid var(--rule)}
 td{padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:middle}
 td input,td select{width:100%;box-sizing:border-box;background:transparent;border:1.5px solid transparent;border-radius:var(--radius-sm);padding:8px}
@@ -123,6 +123,18 @@ td.calc.bad,tfoot td.bad{color:var(--cone-text)}
 .sw.cone{border-color:var(--cone-text)}.sw.dot{border-top-style:dotted}
 .ghost{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--ink-muted);background:var(--paper-deep)}
 .total select{background:var(--field);border:1.5px solid var(--rule);border-radius:var(--radius-sm);padding:6px 8px}
+.affix{display:flex;align-items:center;gap:6px;width:100%}
+.affix input{flex:1;min-width:0;width:auto!important}
+.affix i{font-style:normal;color:var(--ink-muted);font-weight:600}
+.goal select,td select{width:100%;box-sizing:border-box;background:var(--field);border:1.5px solid var(--rule);border-radius:var(--radius-sm);padding:9px 8px}
+td select{background:transparent;border-color:transparent}
+td select:hover{border-color:var(--rule)}
+td .affix input{min-width:11ch}
+.chname input{min-width:17ch}
+td select{min-width:17ch}
+td input[data-f="owner"]{min-width:10ch}
+.na{color:var(--ink-muted);font-size:13px;padding-left:8px}
+.dotk{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--sky);border:1.5px solid var(--ink)}.dotk.over{background:var(--cone)}
 </style>
 
 <div class="wrap">
@@ -192,7 +204,7 @@ td.calc.bad,tfoot td.bad{color:var(--cone-text)}
     <div class="duo">
       <div class="panel" aria-labelledby="m-h">
         <div class="label" id="m-h">Channel map</div>
-        <svg id="map" class="mapsvg" viewBox="0 0 640 340" role="img" aria-label="Channels by working cost per new customer and share of new customers, sized by spend"></svg>
+        <svg id="map" class="mapsvg" viewBox="0 0 640 200" role="img" aria-label="Cost per new customer by channel: what the platform claims and the working CAC"></svg>
         <div class="legend" id="legend"></div>
       </div>
       <div class="panel" aria-labelledby="t-h">
@@ -224,10 +236,10 @@ td.calc.bad,tfoot td.bad{color:var(--cone-text)}
 <script>
 const ORG="Organic, word of mouth, direct";
 const EXAMPLE={id:"example",client:"Demo brand",month:"June",cur:"€",total:9000,src:"est",revealed:false,
- goals:{rev:"€15m → €22m",cm:"€1.5m → €3.5m",cacTarget:"35",why:"",stopped:"",tried:"",audience:""},
- econ:{aov:"60",gm:"55",orders:"1.7",cm2:"15"},
+ goals:{rev:"22,000,000",cm:"3,500,000",cacTarget:"35",why:"",stopped:"",tried:"",audience:""},
+ econ:{model:"repeat",aov:"60",gm:"55",orders:"1.7",price:"",churn:"",cm2:"15"},
  channels:[
-  {name:"Meta",spend:180000,nc:450,share:"25",owner:"Agency",goal:"NC ROAS"},
+  {name:"Meta",spend:180000,nc:450,share:"25",owner:"Agency",goal:"Value / ROAS"},
   {name:"Google non-brand",spend:50000,nc:700,share:"10",owner:"Agency",goal:""},
   {name:"Influencers",spend:90000,nc:250,share:"8",owner:"In-house",goal:""},
   {name:"TikTok",spend:35000,nc:60,share:"2",owner:"Agency",goal:""},
@@ -235,20 +247,30 @@ const EXAMPLE={id:"example",client:"Demo brand",month:"June",cur:"€",total:900
   {name:ORG,spend:0,nc:"",share:"40",owner:"",goal:""}],
  levers:["Exit poll attribution, to cut CAC fast","Bring Meta in-house","Scale influencers, shrink the channels that don't pay back"]};
 const BLANK={client:"",month:"",cur:"€",total:"",src:"est",revealed:false,goals:{rev:"",cm:"",cacTarget:"",why:"",stopped:"",tried:"",audience:""},
- econ:{aov:"",gm:"",orders:"",cm2:""},
+ econ:{model:"",aov:"",gm:"",orders:"",price:"",churn:"",cm2:""},
  channels:[{name:"Meta",spend:"",nc:"",share:"",owner:"",goal:""},{name:"Google",spend:"",nc:"",share:"",owner:"",goal:""},{name:ORG,spend:0,nc:"",share:"",owner:"",goal:""}],levers:["","",""]};
-const GOALS=[["rev","Revenue goal","e.g. €16m → €23m",1],["cm","Contribution margin goal","e.g. CM3 €1.7m → €4m",1],["cacTarget","Their CAC target","Unknown",1],["why","Why now?","Not answered yet",2],["stopped","What stopped you solving it?","Not answered yet",2],["tried","What have you tried?","Not answered yet",2],["audience","Who is the target customer?","Not answered yet",2]];
-const ECON=[["aov","Average order value","Net of returns and refunds"],["gm","Gross margin %","After product, fulfilment and delivery costs"],["orders","Orders per customer, first 12 months","1 if they only buy once"],["cm2","Profit they want left per customer","After marketing (target CM2)"]];
+const GOALS=[["rev","Revenue goal, next 12 months","Unknown","money"],["cm","Contribution margin goal, next 12 months","Unknown","money"],["cacTarget","Their CAC target","Unknown","money"],["why","Why now?","Not answered yet","area"],["stopped","What stopped you solving it?","Not answered yet","area"],["tried","What have you tried?","Not answered yet","area"],["audience","Who is the target customer?","Not answered yet","area"]];
+const MODELS=[["oneoff","One-off purchase"],["repeat","Repeat purchase"],["sub","Subscription"]];
+const ECON_ALL={
+ aov:["Average order value","money","Net of returns and refunds"],
+ orders:["Orders per customer, first 12 months","num","Including the first order"],
+ price:["Average monthly revenue per subscriber","money","Net of discounts and refunds"],
+ churn:["Monthly churn %","pct","Share of subscribers who cancel each month"],
+ gm:["Gross margin %","pct","After product, fulfilment and delivery costs"],
+ cm2:["Profit to keep per new customer","money","First 12 months, after paying to win them (target CM2)"]};
+const ECON_BY={oneoff:["aov","gm","cm2"],repeat:["aov","orders","gm","cm2"],sub:["price","churn","gm","cm2"]};
+const ECON=Object.entries(ECON_ALL).map(([k,v])=>[k,v[0],v[2]]);
+const OPT=["Purchase","New-customer purchase","Value / ROAS","Subscription start","Trial start","Lead / sign-up","Add to cart","App install","Traffic / clicks","Reach / views","Not sure"];
 /* One canvas per brand. BRAND empty = the master template (example data, nothing stored).
    A brand's own copy sets BRAND and keeps its data in its own store, which no other brand's canvas can reach. */
 const BRAND="";
 const KEY="steer-state-of-play-v2";
 let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-const fix=w=>{const b=structuredClone(BLANK);return {...b,...w,goals:{...b.goals,...(w.goals||{})},econ:{...b.econ,...(w.econ||{})},channels:(w.channels||b.channels).map(c=>({...{name:"",spend:"",nc:"",share:"",owner:"",goal:""},...c})),levers:w.levers||b.levers}};
+const fix=w=>{const b=structuredClone(BLANK);if(w.econ&&!w.econ.model&&w.econ.orders)w.econ.model="repeat";return {...b,...w,goals:{...b.goals,...(w.goals||{})},econ:{...b.econ,...(w.econ||{})},channels:(w.channels||b.channels).map(c=>({...{name:"",spend:"",nc:"",share:"",owner:"",goal:""},...c})),levers:w.levers||b.levers}};
 if(!S||!S.channels)S=BRAND?{...structuredClone(BLANK),client:BRAND}:structuredClone(EXAMPLE);
 S=fix(S);
 const $=id=>document.getElementById(id);
-const n=v=>{if(v===""||v==null)return null;const x=parseFloat(String(v).replace(/[^0-9.]/g,""));return isFinite(x)?x:null};
+const n=v=>{if(v===""||v==null)return null;if(typeof v==="number")return v;const m=String(v).replace(/,/g,"").match(/(\d+(?:\.\d+)?)\s*([kKmM]|bn)?/);if(!m)return null;const x=parseFloat(m[1])*({k:1e3,K:1e3,m:1e6,M:1e6,bn:1e9}[m[2]]||1);return isFinite(x)?x:null};
 const money=v=>v==null?"":S.cur+(v>=1e6?(v/1e6).toFixed(1)+"m":v>=1e4?Math.round(v/1e3)+"k":Math.round(v).toLocaleString("en-GB"));
 const pc=v=>v==null?"":(v<1&&v>0?v.toFixed(1):Math.round(v))+"%";
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -294,10 +316,15 @@ function calc(){
   const implied=sh!=null&&tot?sh/100*tot:null;
   return{c,s,k,sh,pshare:k!=null&&tot?k/tot*100:null,cac:s&&k?s/k:null,implied,wcac:s&&implied?s/implied:null}});
  const sp=rows.reduce((a,r)=>a+(r.s||0),0),nc=rows.reduce((a,r)=>a+(r.k||0),0),shSum=rows.reduce((a,r)=>a+(r.sh||0),0),anySh=rows.some(r=>r.sh!=null);
- const e=S.econ,aov=n(e.aov),gm=n(e.gm),or=n(e.orders),cm2=n(e.cm2);
- const cm1=aov!=null&&gm!=null&&or!=null?aov*gm/100*or:null;
+ const e=S.econ,aov=n(e.aov),gm=n(e.gm),or=n(e.orders),cm2=n(e.cm2),price=n(e.price),ch=n(e.churn);
+ let cm1=null,ltv=null,months=null;
+ if(gm!=null){
+  if(e.model==="oneoff"&&aov!=null)cm1=aov*gm/100;
+  else if(e.model==="repeat"&&aov!=null&&or!=null)cm1=aov*gm/100*or;
+  else if(e.model==="sub"&&price!=null&&ch!=null){const r=1-Math.min(100,ch)/100;months=0;for(let t=0;t<12;t++)months+=Math.pow(r,t);cm1=price*gm/100*months;ltv=ch>0?price*gm/100/(ch/100):null}
+ }
  const ceiling=cm1!=null&&cm2!=null?cm1-cm2:null;
- return{tot,rows,sp,nc,shSum,anySh,blended:tot&&sp?sp/tot:null,cm1,ceiling,target:n(S.goals.cacTarget)};
+ return{tot,rows,sp,nc,shSum,anySh,blended:tot&&sp?sp/tot:null,cm1,ceiling,ltv,months,target:n(S.goals.cacTarget)};
 }
 
 /* CSV export */
@@ -307,8 +334,8 @@ function toCSV(){
  const rows=[["section","item","field","value"]];
  rows.push(["workshop","","client",S.client],["workshop","","month",S.month],["workshop","","currency",S.cur],["workshop","","total new customers",U(S.total)],["workshop","","share source",S.src==="ep"?"exit poll":"their estimate"]);
  GOALS.forEach(([k,l])=>rows.push(["goals","",l,U(S.goals[k])]));
- ECON.forEach(([k,l])=>rows.push(["unit economics","",l,U(S.econ[k])]));
- rows.push(["unit economics","","CM1 per customer (12 months)",U(R(C.cm1))],["unit economics","","CAC ceiling",U(R(C.ceiling))],["unit economics","","blended CAC",U(R(C.blended))]);
+ rows.push(["unit economics","","business model",U((MODELS.find(m=>m[0]===S.econ.model)||[])[1])]);(ECON_BY[S.econ.model]||[]).forEach(k=>rows.push(["unit economics","",ECON_ALL[k][0],U(S.econ[k])]));
+ rows.push(["unit economics","","CM1 per customer (12 months)",U(R(C.cm1))],["unit economics","","CAC ceiling",U(R(C.ceiling))],["unit economics","","lifetime gross profit (reference only)",R(C.ltv)],["unit economics","","blended CAC",U(R(C.blended))]);
  C.rows.forEach(r=>{[["spend",r.c.spend],["new customers (platform)",r.c.nc],["platform share %",R(r.pshare)],["CAC (platform)",R(r.cac)],["share of new customers % ("+(S.src==="ep"?"exit poll":"estimate")+")",r.c.share],["working CAC",R(r.wcac)],["owner",r.c.owner],["optimising for",r.c.goal]]
    .forEach(([f,v])=>rows.push(["channel",r.c.name,f,U(v===""?null:v)]))});
  rows.push(["reveal","","share the platforms can explain",$("truthPct").textContent],["reveal","","unknowns",gapsN],["reveal","","guesses",guessN]);
@@ -326,30 +353,38 @@ $("csv").addEventListener("click",async()=>{
 function mark(el){el.classList.toggle("gap",!String(el.value).trim())}
 function markShare(el){const empty=!String(el.value).trim();el.classList.toggle("gap",empty);el.classList.toggle("est",!empty&&S.src==="est")}
 
-function field(id,label,ph,val,area,hint){return `<label class="goal"><span class="label">${label}</span>${area?`<textarea rows="2" id="${id}" placeholder="${ph}">${esc(val)}</textarea>`:`<input id="${id}" value="${esc(val)}" placeholder="${ph}">`}${hint?`<span class="hint">${hint}</span>`:""}</label>`}
+const fmt=v=>{const x=n(v);return x==null?String(v??"").trim():x.toLocaleString("en-GB",{maximumFractionDigits:2})};
+function field(id,label,ph,val,kind,hint){
+ const box=kind==="area"?`<textarea rows="2" id="${id}" placeholder="${ph}">${esc(val)}</textarea>`
+  :`<span class="affix">${kind==="money"?`<i class="pre cur">${esc(S.cur)}</i>`:""}<input id="${id}" value="${esc(val)}" placeholder="${ph}"${kind!=="text"?` class="num" inputmode="decimal" data-kind="${kind}"`:""}>${kind==="pct"?'<i class="suf">%</i>':""}</span>`;
+ return `<label class="goal"><span class="label">${label}</span>${box}${hint?`<span class="hint">${hint}</span>`:""}</label>`}
+function money_blur(el,store){el.addEventListener("blur",()=>{if(el.dataset.kind==="money"||el.dataset.kind==="num"){const f=fmt(el.value);if(f!==el.value){el.value=f;store(f);upd()}}})}
 function build(){
  $("client").value=S.client;$("month").value=S.month;$("cur").value=S.cur;$("totalNc").value=S.total;$("src").value=S.src;
  $("client").placeholder="Client name";$("month").placeholder="Month";
- $("goals").innerHTML=GOALS.map(([k,l,p,t])=>field("g_"+k,l,p,S.goals[k],t===2)).join("");
- GOALS.forEach(([k])=>{const el=$("g_"+k);el.addEventListener("input",()=>{S.goals[k]=el.value;mark(el);upd()});mark(el)});
- $("econ").innerHTML=ECON.map(([k,l,h])=>field("e_"+k,l,"Unknown",S.econ[k],false,h)).join("");
- ECON.forEach(([k])=>{const el=$("e_"+k);el.inputMode="decimal";el.classList.add("num");el.addEventListener("input",()=>{S.econ[k]=el.value;mark(el);upd()});mark(el)});
+ $("goals").innerHTML=GOALS.map(([k,l,p,t])=>field("g_"+k,l,p,S.goals[k],t)).join("");
+ GOALS.forEach(([k])=>{const el=$("g_"+k);el.addEventListener("input",()=>{S.goals[k]=el.value;mark(el);upd()});money_blur(el,v=>S.goals[k]=v);mark(el)});
+ const mdl=`<label class="goal"><span class="label">Business model</span><select id="e_model"><option value="">Choose…</option>${MODELS.map(([v,l])=>`<option value="${v}"${S.econ.model===v?" selected":""}>${l}</option>`).join("")}</select><span class="hint">Sets how a customer's value is worked out</span></label>`;
+ $("econ").innerHTML=mdl+(ECON_BY[S.econ.model]||[]).map(k=>field("e_"+k,ECON_ALL[k][0],"Unknown",S.econ[k],ECON_ALL[k][1],ECON_ALL[k][2])).join("");
+ mark($("e_model"));$("e_model").addEventListener("change",e=>{const E=S.econ;E.model=e.target.value;if(E.model==="sub"&&!E.price&&E.aov)E.price=E.aov;if(E.model!=="sub"&&E.model&&!E.aov&&E.price)E.aov=E.price;build()});
+ (ECON_BY[S.econ.model]||[]).forEach(k=>{const el=$("e_"+k);el.addEventListener("input",()=>{S.econ[k]=el.value;mark(el);upd()});money_blur(el,v=>S.econ[k]=v);mark(el)});
  $("shareHead").textContent="Share of new customers ("+(S.src==="ep"?"exit poll":"their estimate")+")";
  $("rows").innerHTML=S.channels.map((c,i)=>`<tr data-i="${i}">
   <td class="chname"><input data-f="name" value="${esc(c.name)}" aria-label="Channel name" placeholder="Channel"></td>
-  <td><input class="num" data-f="spend" inputmode="numeric" value="${esc(c.spend)}" aria-label="${esc(c.name)} spend" placeholder="Unknown"></td>
+  <td><span class="affix"><i class="pre cur">${esc(S.cur)}</i><input class="num" data-f="spend" data-kind="money" inputmode="numeric" value="${esc(c.spend===""?"":fmt(c.spend))}" aria-label="${esc(c.name)} spend" placeholder="Unknown"></span></td>
   <td><input class="num" data-f="nc" inputmode="numeric" value="${esc(c.nc)}" aria-label="${esc(c.name)} new customers, platform" placeholder="${n(c.spend)===0?"No platform":"Unknown"}"></td>
   <td class="calc num" data-c="pshare"></td>
   <td class="calc num" data-c="cac"></td>
   <td><span class="pct"><input class="num share" data-f="share" inputmode="decimal" value="${esc(c.share)}" aria-label="${esc(c.name)} share of new customers" placeholder="?"><span>%</span></span></td>
   <td class="calc num" data-c="wcac"></td>
   <td><input data-f="owner" value="${esc(c.owner)}" aria-label="${esc(c.name)} owner" placeholder="No owner"></td>
-  <td><input data-f="goal" value="${esc(c.goal)}" aria-label="${esc(c.name)} optimisation goal" placeholder="Unknown"></td>
+  <td>${n(c.spend)===0?'<span class="na">Not paid</span>':`<select data-f="goal" aria-label="${esc(c.name)} optimisation goal"><option value="">Unknown</option>${(OPT.includes(c.goal)||!c.goal?OPT:[c.goal,...OPT]).map(o=>`<option${o===c.goal?" selected":""}>${esc(o)}</option>`).join("")}</select>`}</td>
   <td><button class="x" type="button" data-del="${i}" aria-label="Remove ${esc(c.name)}">✕</button></td></tr>`).join("");
+ $("rows").querySelectorAll("select[data-f]").forEach(el=>{const i=+el.closest("tr").dataset.i;const mk=()=>el.classList.toggle("gap",!el.value||el.value==="Not sure");mk();el.addEventListener("change",()=>{S.channels[i].goal=el.value;mk();upd()})});
  $("rows").querySelectorAll("input").forEach(el=>{
   const f=el.dataset.f,i=+el.closest("tr").dataset.i,noPlat=f==="nc"&&n(S.channels[i].spend)===0;
   if(f==="share")markShare(el);else if(!noPlat)mark(el);
-  el.addEventListener("input",()=>{S.channels[i][f]=el.value;if(f==="share")markShare(el);else if(!(f==="nc"&&n(S.channels[i].spend)===0))mark(el);upd()})});
+  el.addEventListener("input",()=>{S.channels[i][f]=el.value;if(f==="share")markShare(el);else if(!(f==="nc"&&n(S.channels[i].spend)===0))mark(el);upd()});if(f==="spend")money_blur(el,v=>S.channels[i].spend=v)});
  $("rows").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{S.channels.splice(+b.dataset.del,1);build()}));
  $("levers").innerHTML=S.levers.map((l,i)=>`<div class="lever"><input id="lv${i}" value="${esc(l)}" aria-label="Lever ${i+1}" placeholder="Not agreed yet"></div>`).join("");
  S.levers.forEach((_,i)=>{const el=$("lv"+i);mark(el);el.addEventListener("input",()=>{S.levers[i]=el.value;mark(el);upd()})});
@@ -402,7 +437,8 @@ function drawBars(C){
   v=parts.join(" ");
  }
  $("verdict").textContent=v;
- $("econNote").textContent=S.revealed&&C.cm1!=null?`How: order value × gross margin × orders in 12 months = ${money(C.cm1)} of gross profit per customer (CM1). Take away the ${money(n(S.econ.cm2)||0)} they want left after marketing (CM2) = a ceiling of ${money(C.ceiling)}.`:"";
+ const how=S.econ.model==="sub"?`monthly revenue × gross margin × ${C.months!=null?C.months.toFixed(1):"?"} months a subscriber stays on average in their first year`:S.econ.model==="repeat"?"order value × gross margin × orders in 12 months":"order value × gross margin";
+ $("econNote").textContent=S.revealed&&C.cm1!=null?`How: ${how} = ${money(C.cm1)} of gross profit per customer in 12 months (CM1). Take away the ${money(n(S.econ.cm2)||0)} they want to keep (CM2) = a ceiling of ${money(C.ceiling)}.${C.ltv!=null?` For reference, lifetime gross profit is ${money(C.ltv)}, but the ceiling uses the first 12 months so it doesn't depend on customers staying for years.`:""}`:"";
 }
 
 function drawGauge(p,known,belief){
@@ -421,37 +457,37 @@ function drawGauge(p,known,belief){
 }
 
 function drawMap(C){
- const W=640,H=340,L=56,R=16,T=16,B=44,tot=C.tot||1;
- const ch=C.rows.filter(r=>r.s>0&&(r.wcac||r.cac)).map(r=>{const truth=r.wcac!=null;return{name:r.c.name||"Unnamed",s:r.s,cac:truth?r.wcac:r.cac,share:truth?r.sh:r.pshare,pcac:r.cac,pshare:r.pshare,truth}});
- const lim=S.revealed&&C.ceiling!=null?C.ceiling:null;
- const vals=ch.flatMap(c=>[c.cac,c.pcac]).concat([C.blended,lim,C.target]).filter(v=>v>0);
+ /* One row per paid channel. Ring = what the platform claims, dot = working CAC from the share column. */
+ const W=640,L=150,Rm=72,T=34,ROW=34,B=34;
+ const lim=S.revealed&&C.ceiling!=null?C.ceiling:null,line=lim||C.target;
+ const ch=C.rows.filter(r=>r.s>0&&(r.wcac||r.cac)).map(r=>({name:r.c.name||"Unnamed",s:r.s,w:r.wcac,p:r.cac})).sort((a,b)=>(a.w||a.p)-(b.w||b.p));
+ const H=T+Math.max(1,ch.length)*ROW+B;
+ const vals=ch.flatMap(c=>[c.w,c.p]).concat([C.blended,line]).filter(v=>v>0);
  let lo=10,hi=1000;vals.forEach(v=>{while(v<lo)lo/=10;while(v>hi)hi*=10});
- const lx=v=>L+(Math.log10(v)-Math.log10(lo))/(Math.log10(hi)-Math.log10(lo))*(W-L-R);
- const ymax=Math.max(10,Math.ceil(Math.max(0,...ch.flatMap(c=>[c.share||0,c.pshare||0]))/5)*5);
- const ly=v=>H-B-v/ymax*(H-T-B);
- const maxS=Math.max(1,...ch.map(c=>c.s));
+ const x=v=>L+(Math.log10(v)-Math.log10(lo))/(Math.log10(hi)-Math.log10(lo))*(W-L-Rm);
  let g="";
- for(let d=lo;d<=hi;d*=10){const x=lx(d);g+=`<line x1="${x}" y1="${T}" x2="${x}" y2="${H-B}" stroke="var(--rule)"/><text x="${x}" y="${H-B+20}" text-anchor="middle" fill="var(--ink-muted)" font-size="12">${money(d)}</text>`}
- for(let v=0;v<=ymax;v+=ymax/5){const y=ly(v);g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="var(--rule)" stroke-dasharray="${v?"2 4":""}"/><text x="${L-8}" y="${y+4}" text-anchor="end" fill="var(--ink-muted)" font-size="12">${Math.round(v)}%</text>`}
- g+=`<text x="${W-R}" y="${H-6}" text-anchor="end" fill="var(--ink-muted)" font-size="12">Cost per new customer →</text><text x="${L}" y="${T-4}" fill="var(--ink-muted)" font-size="12">Share of new customers</text>`;
- if(C.blended){const x=lx(C.blended);g+=`<line x1="${x}" y1="${T}" x2="${x}" y2="${H-B}" stroke="var(--ink)" stroke-width="2"/>`}
- if(lim){const x=lx(lim);g+=`<line x1="${x}" y1="${T}" x2="${x}" y2="${H-B}" stroke="var(--cone-text)" stroke-width="2" stroke-dasharray="6 5"/>`}
- else if(C.target){const x=lx(C.target);g+=`<line x1="${x}" y1="${T}" x2="${x}" y2="${H-B}" stroke="var(--ink-muted)" stroke-width="2" stroke-dasharray="2 4"/>`}
- const line=lim||C.target;
- const pts=ch.map(c=>({...c,x:lx(c.cac),y:ly(c.share||0),r:8+Math.sqrt(c.s/maxS)*28,over:line&&c.cac>line,gx:c.truth&&c.pcac?lx(c.pcac):null,gy:c.truth&&c.pshare!=null?ly(c.pshare):null})).sort((a,b)=>b.r-a.r);
- pts.forEach(p=>{if(p.gx!=null&&p.gy!=null){g+=`<line x1="${p.gx}" y1="${p.gy}" x2="${p.x}" y2="${p.y}" stroke="var(--ink-muted)" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="${p.gx}" cy="${p.gy}" r="5" fill="var(--paper-deep)" stroke="var(--ink-muted)" stroke-width="1.5"/>`}});
- pts.forEach(p=>{g+=`<circle class="bub" cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${p.over?"var(--cone)":"var(--sky)"}" fill-opacity=".85" stroke="var(--ink)" stroke-width="1.5"><title>${esc(p.name)}: ${money(p.s)} spend, ${money(p.cac)} per new customer</title></circle>`});
- const placed=[];pts.slice().sort((a,b)=>a.y-b.y).forEach(p=>{let ty=p.y-p.r-8;placed.forEach(q=>{if(Math.abs(q.x-p.x)<120&&Math.abs(q.ty-ty)<16)ty=q.ty-16});ty=Math.max(T+12,ty);placed.push({x:p.x,ty});
-  const anchor=p.x>W-130?"end":p.x<L+70?"start":"middle";
-  g+=`<text x="${p.x}" y="${ty}" text-anchor="${anchor}" fill="var(--ink)" font-size="13" font-weight="600">${esc(p.name)} · ${money(p.cac)}</text>`});
- if(!pts.length)g+=`<text x="${(W+L)/2}" y="${(H-B)/2}" text-anchor="middle" fill="var(--cone-text)" font-size="14">Add spend and a share or new customers to place a channel here.</text>`;
- $("map").innerHTML=`<g font-family="Instrument Sans,sans-serif">${g}</g>`;
- $("legend").innerHTML=`<span><i class="sw solid"></i>Blended CAC</span>${lim?`<span><i class="sw cone"></i>What margins allow</span>`:C.target?`<span><i class="sw dot"></i>Their CAC target</span>`:""}<span><i class="ghost"></i>Where the platform puts it</span><span>Bubble size = spend</span>`;
+ for(let d=lo;d<=hi;d*=10){const X=x(d);g+=`<line x1="${X}" y1="${T-6}" x2="${X}" y2="${H-B}" stroke="var(--rule)"/><text x="${X}" y="${H-B+18}" text-anchor="middle" fill="var(--ink-muted)" font-size="12">${money(d)}</text>`}
+ const marks=[];
+ if(C.blended)marks.push({v:C.blended,label:"Blended "+money(C.blended),stroke:"var(--ink)",dash:""});
+ if(lim)marks.push({v:lim,label:"Margins allow "+money(lim),stroke:"var(--cone-text)",dash:"6 5"});
+ else if(C.target)marks.push({v:C.target,label:"Their target "+money(C.target),stroke:"var(--ink-muted)",dash:"2 4"});
+ marks.sort((a,b)=>a.v-b.v).forEach((m,i)=>{const X=x(m.v);const lx=i===0?X-6:X+6,anchor=i===0?"end":"start";
+  g+=`<line x1="${X}" y1="${T-6}" x2="${X}" y2="${H-B}" stroke="${m.stroke}" stroke-width="2" stroke-dasharray="${m.dash}"/><text x="${lx}" y="${T-12}" text-anchor="${anchor}" fill="${m.stroke}" font-size="12" font-weight="600">${m.label}</text>`});
+ ch.forEach((c,i)=>{const y=T+i*ROW+ROW/2,val=c.w||c.p,over=line&&val>line;
+  g+=`<line x1="${L}" y1="${y}" x2="${W-Rm}" y2="${y}" stroke="var(--rule)" stroke-dasharray="1 4"/>`;
+  g+=`<text x="${L-12}" y="${y+4}" text-anchor="end" fill="var(--ink)" font-size="13" font-weight="600">${esc(c.name.length>20?c.name.slice(0,19)+"…":c.name)}</text>`;
+  if(c.w&&c.p){g+=`<line x1="${x(c.p)}" y1="${y}" x2="${x(c.w)}" y2="${y}" stroke="var(--ink-muted)" stroke-width="2"/><circle cx="${x(c.p)}" cy="${y}" r="6" fill="var(--paper-deep)" stroke="var(--ink-muted)" stroke-width="2"><title>Platform claims ${money(c.p)}</title></circle>`}
+  g+=`<circle cx="${x(val)}" cy="${y}" r="8" fill="${over?"var(--cone)":"var(--sky)"}" stroke="var(--ink)" stroke-width="1.5"><title>${esc(c.name)}: ${money(val)} per new customer${c.w?" (working CAC)":" (platform only)"}</title></circle>`;
+  g+=`<text x="${W-4}" y="${y+4}" text-anchor="end" fill="${over?"var(--cone-text)":"var(--ink)"}" font-size="13" font-weight="600">${money(val)}</text>`});
+ if(!ch.length)g+=`<text x="${(W+L)/2}" y="${T+ROW/2+4}" text-anchor="middle" fill="var(--cone-text)" font-size="13">Add spend and new customers or a share to place a channel here.</text>`;
+ const svg=$("map");svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+ svg.innerHTML=`<g font-family="Instrument Sans,sans-serif">${g}</g>`;
+ $("legend").innerHTML=`<span><i class="ghost"></i>What the platform claims</span><span><i class="dotk"></i>Working CAC, from the share column</span><span><i class="dotk over"></i>Above ${lim?"what margins allow":"their target"}</span>`;
 }
 
 $("client").addEventListener("input",e=>{S.client=e.target.value;mark(e.target);upd()});
 $("month").addEventListener("input",e=>{S.month=e.target.value;mark(e.target);upd()});
-$("cur").addEventListener("change",e=>{S.cur=e.target.value;upd()});
+$("cur").addEventListener("change",e=>{S.cur=e.target.value;document.querySelectorAll(".cur").forEach(x=>x.textContent=S.cur);upd()});
 $("src").addEventListener("change",e=>{S.src=e.target.value;build()});
 $("totalNc").addEventListener("input",e=>{S.total=e.target.value;mark(e.target);upd()});
 $("reveal").addEventListener("click",()=>{S.revealed=!S.revealed;upd()});
