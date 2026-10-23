@@ -19,7 +19,7 @@ description: Run the 90-minute State of Play workshop with a prospect on the liv
 | 5–20 | 1. Where they want to go | Revenue goal and why. Margin goal. Their CAC target. Why now? What stopped you? What have you tried? Who's the customer? Then what a new customer is worth: order value, gross margin, orders in 12 months, profit wanted after marketing. | Goals, unit economics |
 | 20–50 | 2. Channels, last month | For each channel: spend, new customers the platform claims, owner, what it optimises for. Total new customers. Then, for each channel and for organic: "What share of new customers do you think it drives?" | Channels table |
 | 50–65 | 3. The reveal | Press Reveal: their target vs what margins allow vs what they pay. Walk the channel map, then the gauge: what the platforms can prove vs what they believe. | Read, don't type |
-| 65–80 | 4. Gaps and levers | Count the unknowns and guesses. Agree three levers in their words. | Levers |
+| 65–80 | 4. Gaps and levers | Count the unknowns and guesses. Agree three levers in their words. For each lever, ask: who owns it, and by when? | Levers |
 | 80–90 | Close | "The diagnostic answers every orange and yellow box." Agree a start date and data access. | — |
 
 ## Rules for the chair
@@ -30,4 +30,8 @@ description: Run the 90-minute State of Play workshop with a prospect on the liv
 
 ## After (within 24 hours)
 - Export the CSV. The Delivery agent writes the canvas into the brand's Notion client record.
-- Send a one-page summary and the proposal. The canvas becomes the onboarding brief.
+- The Delivery agent drafts the one-page summary and the proposal. Nothing goes to the brand until Adam approves it. The canvas becomes the onboarding brief.
+
+## Change log
+- v0.2 (23 Oct 2026): at step 4, the chair asks for an owner and a date for each lever. Anything not agreed is recorded as `PROPOSED` by `workshop-to-notion`. The summary and proposal are drafts for Adam to approve, not sent automatically.
+- v0.1 (22 Oct 2026): first version, from the chair's run sheet.

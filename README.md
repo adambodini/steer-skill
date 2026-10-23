@@ -10,11 +10,18 @@ This repo holds **methodology only**: how things are done. It never holds client
 
 | Folder | What it is | Lifecycle stage |
 |---|---|---|
+| `skills/prospect-research` | Public-data research, canvas pre-fill, outreach draft; also the bake-off job spec | Acquire |
 | `skills/state-of-play-workshop` | Running the 90-minute State of Play workshop | Convert |
-| `skills/exit-poll-attribution` | Exit poll design, the attribution multiplier, working CAC | Diagnose, Operate |
+| `skills/workshop-to-notion` | Agent 1 (Delivery agent): canvas to client record, summary and proposal drafts | Convert, Onboard |
 | `skills/cac-ceiling` | The contribution margin stack and the CAC ceiling | Convert, Diagnose |
-| `skills/meta-playbook` | Meta principles across the five pillars | Diagnose, Operate |
-| `skills/channel-standard` | Scoring any channel against its standard each month | Operate |
+| `skills/exit-poll-attribution` | Exit poll design, the attribution multiplier, working CAC | Diagnose, Operate |
+| `skills/channel-standard` | How any channel is scored each month across five pillars | Operate |
+| `skills/meta-playbook` | Meta standard: principles across the five pillars | Diagnose, Operate |
+| `skills/google-ads-channel-standard` | Google Ads standard: levels and open tests | Diagnose, Operate |
+| `skills/tiktok-ads-channel-standard` | TikTok Ads standard: levels and open tests | Diagnose, Operate |
+| `skills/creator-channel-standard` | Influencer / creator standard: levels and open tests | Diagnose, Operate |
+| `skills/monthly-state-of-play` | Monthly scoring of each live channel, for Adam to review | Operate |
+| `skills/mentor-loop` | Mentor challenge brief before, test log after | Improve |
 | `templates/state-of-play-canvas` | The master workshop canvas (HTML) | Convert |
 
 ## How a skill is written
